@@ -1,0 +1,36 @@
+PRIORITIES:
+1. feature complete
+2. bug free
+3. pretty up UI
+4. clean up code / better utilize Angular/MVC organization if you didn't do that well the first time
+5. more bug testing
+6. prettier UI
+7. add extra features if time allows
+
+HIGH HIGH LEVEL PLAN:
+- Allow user to log in to Twitter.
+- Pull tweets
+- Count words by most commonly used
+- Remove articles/prepositions/pronouns/other very common words to leave only "keywords"
+- Give each remaining word a rank value (RV)
+- Create searches to query Flickr, there will be 31 total, loop through searches:
+    - consider modifying RV with RNG to add variability
+    - use top 3 keywords for search based on RV. in case of tie, choose randomly.
+    - make sure search returns at least 1 image that isn't already in collage, if not:
+        - use top 2 key words, if not use top key word, if not remove top keyword as invalid and use new top 3 keywords
+    - modify all key words used in search to lower their value to allow other keywords to surface to top
+	- (formula should allow highly common words to stay near the top for a few searches before they get buried)
+- Once searches are done and images are pulled prepare the images for the collage
+    - collage will be 5x5 grid (25 squares total, each square in grid ~160px)
+    - scale/crop top 3 images to 2x2 (12 squares total)
+    - scale crop next 8 images to 1x1 (8 squares total)
+    - scale crop next 20 images to .5x.5 (place 4 images to a square, 5 squares total)
+- place images randomly into grid, display collage as seperate images placed directly next to eachother.
+    - image sizes make it impossible to get "stuck" and not be able to fit an image somewhere. (it is impossible to place 2 2x2 squares into a 5x5 grid in such a way that a 3rd 2x2 square can't fit somewhere. also, after all 3 2x2 squares have been placed everything else fits into a single square)
+
+IF TIME ALLOWS:
+- let user log into Facebook, Google+, etc instead of twitter
+- improve grid formula to allow more variety in square sizes. this will be much more complex because you'll have to make sure all images fit within the grid
+- figure out how to properly merge seperate images into a single image
+
+
