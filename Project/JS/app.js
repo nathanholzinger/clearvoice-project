@@ -5,11 +5,6 @@ for (var i=0; i<31; i++) {
   images[i] = {id : i};
 }
 
-
-//FUNCTION : BUILD DATA
-//Collect data to build an array of most commonly used words along with the frequency of their use
-//Currently the data is just collected from the commonWords array in commonWords.js 
-//Eventually, the user will log into Twitter and their data will come from their tweets
 function buildData() {
   var data = commonWords;
   var exclude = stopWords;
@@ -37,10 +32,10 @@ function buildQueryTags(data) {
   var temp;
 
   for (var i=0; i<images.length; i++) {
-    qT = [data[0][0], data[1][0], data[2][0]];
-    qS = [data[0][1], data[1][1], data[2][1]];
+    qT = [data[0][0], data[1][0]];
+    qS = [data[0][1], data[1][1]];
     images[i].queryTags = qT;
-    images[i].queryStrength = (qS[0] + qS[1] + qS[2]) / 3;
+    images[i].queryStrength = (qS[0] + qS[1]) / 2;
 
     data[0][1] = data[0][1] * depreciation;
     data[1][1] = data[1][1] * depreciation;
@@ -59,11 +54,51 @@ function buildQueryTags(data) {
   }
 }
 
+//FUNCTION : QUERY FLICKR
+function queryFlickr(){
+  var flickrAPI = "http://api.flickr.com/services/feeds/photos_public.gne?jsoncallback=?";
+  var flickrQuery = {format: "json"};
+  var c = 0;
+  var gridSize = Math.round(($("#collage").width()-15)/10);
+  var temp;
+
+
+  for (var i=0; i<images.length; i++) {
+    flickrQuery.tags = images[i].queryTags.toString();
+
+    $.getJSON(flickrAPI, flickrQuery, function(data){
+      images[c].data = data;
+
+      if (data.items.length > 0) {
+        images[c].url = data.items[0].link.toString();
+        images[c].source = data.items[0].media.m;
+        images[c].img = new Image();
+        images[c].img.src = images[c].source;
+      } else {
+        images[c].url = "";
+        images[c].source = ""
+      }
+
+      $('#image'+c).css('background-image', 'url(' + images[c].source + ')');
+      $('#image'+c).css('background-size', images[c].imageSize*gridSize + 'px ' + images[c].imageSize*gridSize + 'px');
+      
+      c++;
+    });
+  }
+}
+
 //FUNCTION : BUILD COLLAGE GRID
 //defines the size of each image and the place that the image will go in the collage
 //Currently there is only one collage shape hardcoded
 //Eventually, the intention is for the grid to be procedurally generated so each shape is different
 function buildCollageGrid() {
+  var gridSize = Math.floor(($("#collage").width()-30)/10);
+  var rngR = 0;
+  var rngG = 0;
+  var rngB = 0;
+  var width = 0;
+  var height = 0;
+
   var imageSizes = [
     4, 4, 4, 
     2, 2, 2, 2, 2, 2, 2, 2, 
@@ -79,48 +114,35 @@ function buildCollageGrid() {
     images[i].imageSize = imageSizes[i];
     images[i].gridPlace = gridPlacements[i];
   }
-}
 
-//FUNCTION : QUERY FLICKR
-function queryFlickr(){
-  var flickrAPI = "http://api.flickr.com/services/feeds/photos_public.gne?jsoncallback=?";
-  var flickrQuery = {format: "json"};
-  var c = 0;
-  var gridSize = Math.round(($("#collage").width()-15)/10);
-  
-  
+  var collageHTML = '';
   for (var i=0; i<images.length; i++) {
-    flickrQuery.tags = images[i].queryTags.toString();
-
-    $.getJSON(flickrAPI, flickrQuery, function(data){
-      images[c].data = data;
-      console.log(data);
-
-      if (data.items.length > 0) {
-        images[c].url = data.items[0].link;
-        images[c].source = data.items[0].media.m;
-      } else {
-        images[c].url = "http://hdwallpapersfit.com/wp-content/uploads/2015/03/wpid-Potato-Wallpaper-3.jpg";
-        images[c].source = "http://hdwallpapersfit.com/wp-content/uploads/2015/03/wpid-Potato-Wallpaper-3.jpg"
-      }
-      
-      images[c].HTML = '<img src="' + images[c].source + '" class="collage-image"></img>'
-      collageHTML = '';
-      for (var j=0; j<c; j++){
-        collageHTML += images[j].HTML;
-      }
-      $('#collage').html(collageHTML);
-      
-      c++;
-    });
+    collageHTML += '<canvas id="image' + i + '" ';
+    collageHTML += 'width="' + gridSize*imageSizes[i] + '" height="' + gridSize*imageSizes[i] + '" style="background-color: #cccccc;"';
+    collageHTML += '></canvas>';
   }
+  $("#collage").html(collageHTML);
+
+  for (var i=0; i<images.length; i++) {
+    rngR = Math.floor((Math.random()*128))+128;
+    rngG = Math.floor((Math.random()*128))+128;
+    rngB = Math.floor((Math.random()*128))+128;
+    $('#image'+i).css('background-color', 'rgb(' + rngR + ',' + rngG + ',' + rngB + ')');
+    $('#image'+i).css('box-shadow', 'inset 2px 2px #ffffff');
+    $('#image'+i).css('background-position', 'center center');
+    $('#image'+i).css('background-size', gridSize*imageSizes[i] + 'px ' + gridSize*imageSizes[i] + 'px');
+    $('#image'+i).css('position', 'absolute');
+    $('#image'+i).offset({left: 8+gridSize*gridPlacements[i][0], top: 88+gridSize*gridPlacements[i][1]})
+  }
+
 }
+
+buildCollageGrid();
 
 //ON CLICK FUNCTION
 $('#getData').click(function() {
   var keywordData = buildData();
   buildQueryTags(keywordData);
-  buildCollageGrid();
   queryFlickr();
 });
 
