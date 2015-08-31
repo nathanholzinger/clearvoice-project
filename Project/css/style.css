@@ -1,3 +1,73 @@
+body {
+	font-family: Roboto, sans-serif;
+	font-weight: 300;
+	color: #444;
+	margin: auto;
+	max-width: 720px;
+}
+
+h1 {
+  font-size: 3em;
+  font-weight: 700;
+  text-align: justify;
+}
+
+h1 span {
+  font-size: .75em;
+  font-weight: 300;
+  color: #808080;
+}
+
+h2 {
+	font-size: 1.25em;
+	font-weight: 300;
+}
+
+#header h2 {
+	text-align: center;
+}
+
+#header .right, #header .left, #header .center {
+	display: inline-block;
+}
+
+.right {
+	float: right;
+}
+
+.left {
+	float: left;
+}
+
+.center {
+	margin: 0 auto;
+}
+
+#twitter-div a {
+	display: inline-block;
+	position: relative;
+	width: 100%;
+	height: 72px;
+	cursor: pointer;
+	background: url('../img/twitter-background.png') no-repeat;
+	font-size: 3em;
+	color: #fff;
+	line-height: 72px;
+	vertical-align: middle;
+	padding: 0 0 0 96px;
+	text-decoration: none;
+	box-shadow: inset 0 0 0 1px #ffffff;
+}
+
 #collage {
-	max-width: 800px;
+	position: relative;
+}
+
+#col1, #col2 {
+	width: 50%;
+  display: inline-block;
+}
+
+#collage-button {
+	float: right;
 }

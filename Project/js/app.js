@@ -1,33 +1,38 @@
 $(document).ready(function() {
 
+  
+
   //Global variable images, array of objects that include information such as the url to grab the image from 
   // and the position and size of the image when it is placed into the collage
   var images = [{}];
   for (var i=0; i<31; i++) {
     images[i] = {id : i};
   }
+  var result;
+  
 
   //--------------------------------------------------------------------------------
   //FUNCTION : BUILD DATA
   //takes text from tweets, parses it, and builds a list of the most frequently used words
-  function buildData() {
-    var data = sampleTwitterData.statuses;
+  function buildData(data) {
+    var tweets = data.statuses;
     var temp = [];
     var words = [];
     var wordFrequency = [];
     var exclude = stopWords;
+    //console.log(tweets);
 
     //takes the all of the tweets pulled from the Twitter Query and breaks them down into an array of individual words
-    for (var i=0; i<data.length; i++) {
-      temp = data[i].text.split(" ");
+    for (var i=0; i<tweets.length; i++) {
+      temp = tweets[i].text.split(" ");
       for (var j=0; j<temp.length; j++) {
         words.push(temp[j]);
       }
     }
+    //console.log(words);
     
     //creates an array of unique words and their frequency. 
     //each array element is an object with a unique ord and the number of times it occurs in the tweets
-    words;
     for (var i=0; i<words.length; i++) {temp[i] = true}
     for (var i=0; i<words.length; i++) {
       if (temp[i]) {
@@ -40,6 +45,7 @@ $(document).ready(function() {
         }
       }
     }
+    //console.log(wordFrequency);
 
     //removes stop words from the list
     for (var i=0; i<wordFrequency.length; i++) {
@@ -51,6 +57,7 @@ $(document).ready(function() {
         }
       }
     }
+    //console.log(wordFrequency);
 
     //orders the word list from most frequently used to least frequently used
     for (var i=0; i<wordFrequency.length; i++) {
@@ -62,6 +69,7 @@ $(document).ready(function() {
         }
       }
     }
+    //console.log(wordFrequency);
 
     return wordFrequency;
   }
@@ -108,7 +116,7 @@ $(document).ready(function() {
     var flickrAPI = "http://api.flickr.com/services/feeds/photos_public.gne?jsoncallback=?";
     var flickrQuery = {format: "json"};
     var c = 0;
-    var gridSize = Math.round(($("#collage").width()-15)/10);
+    var gridSize = Math.floor($("#collage").width())/10;
     var temp;
 
 
@@ -141,20 +149,23 @@ $(document).ready(function() {
   //defines the size of each image and the place that the image will go in the collage
   //Currently there is only one collage shape hardcoded
   function buildCollageGrid() {
-    var gridSize = Math.floor(($("#collage").width()-30)/10);
+    var cols = 5;
+    var rows = 5;
+    var subdivs = 2;
+    var gridSize = Math.floor($("#collage").width())/10;
+    var rng = 0;
     var rngR = 0;
     var rngG = 0;
     var rngB = 0;
-    var width = 0;
-    var height = 0;
+    var grid = [{}];
 
     //idicates the size of each image, images are all square so a '4' takes up 4x4 spaces in the grid
     var imageSizes = [
-      4, 4, 4, 
-      2, 2, 2, 2, 2, 2, 2, 2, 
-      1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
+      4, 4, 4, //3 at 4x4
+      2, 2, 2, 2, 2, 2, 2, 2, //8 at 2x2
+      1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 //20 at 1x1
     ];
-    //indicates the position to postion in the grid [0]=column and [1]=row, position is aligned to the top left corner
+    //indicates the coordinates to position the image in the grid [0]=column and [1]=row, position is aligned to the top left corner
     var gridPlacements = [
       [0,2], [4,0], [2,6],
       [4,4], [0,6], [6,4], [6,6], [8,4], [6,8], [0,0], [8,0],
@@ -169,9 +180,9 @@ $(document).ready(function() {
     //builds the HTML required to create the collage grid
     var collageHTML = '';
     for (var i=0; i<images.length; i++) {
-      collageHTML += '<canvas id="image' + i + '" ';
+      collageHTML += '<div id="image' + i + '" ';
       collageHTML += 'width="' + gridSize*imageSizes[i] + '" height="' + gridSize*imageSizes[i] + '" style="background-color: #cccccc;"';
-      collageHTML += '></canvas>';
+      collageHTML += '></div>';
     }
     $("#collage").html(collageHTML);
 
@@ -180,27 +191,57 @@ $(document).ready(function() {
       rngR = Math.floor((Math.random()*128))+128;
       rngG = Math.floor((Math.random()*128))+128;
       rngB = Math.floor((Math.random()*128))+128;
-      $('#image'+i).css('background-color', 'rgb(' + rngR + ',' + rngG + ',' + rngB + ')');
-      $('#image'+i).css('box-shadow', 'inset 2px 2px #ffffff');
-      $('#image'+i).css('background-position', 'center center');
-      $('#image'+i).css('background-size', gridSize*imageSizes[i] + 'px ' + gridSize*imageSizes[i] + 'px');
+      $('#image'+i).css('width', gridSize*imageSizes[i] + 'px ')
+      $('#image'+i).css('height', gridSize*imageSizes[i] + 'px ')
+      $('#image'+i).css('background', 'rgb(' + rngR + ',' + rngG + ',' + rngB + ')');
+      $('#image'+i).css('box-shadow', 'inset 0 0 0 1px #ffffff');
       $('#image'+i).css('position', 'absolute');
-      $('#image'+i).offset({left: 8+gridSize*gridPlacements[i][0], top: 88+gridSize*gridPlacements[i][1]})
+      $('#image'+i).css('left', gridSize*gridPlacements[i][0]);
+      $('#image'+i).css('top', gridSize*gridPlacements[i][1]);
     }
 
   }
 
-
-
-  //call to build the collage grid. this can be done as soon as the page loads so it is outside the #get-data on click function
+  //--------------------------------------------------------------------------------
+  //INITIALIZING FUNCTIONS
+  $('.logged-in').hide();
+  OAuth.initialize('e6hbcVf2qxOe0ry6UFhrUH2eHDE');
   buildCollageGrid();
 
   //--------------------------------------------------------------------------------
-  //FUNCTION : #get-data ON CLICK
-  $('#get-data').click(function() {
-    var keywordData = buildData();
-    buildQueryTags(keywordData);
-    queryFlickr();
+  //FUNCTION CLICK TWITTER _LOGIN_ BUTTON
+  $('#twitter-login-button').click(function() {
+    $('.not-logged-in').hide();
+    $('.logged-in').show();
+    OAuth.popup('twitter', {cache: true}).done(function(oAuthResult) {
+      result = oAuthResult;
+      result.me().done(function(data){
+        $('.logged-in').text("Hi, " + data.name + "!");
+      });
+    });
+  });
+
+  //--------------------------------------------------------------------------------
+  //FUNCTION CLICK TWITTER _LOGOUT_ BUTTON
+  //not implemented yet (learn more: http://docs.oauth.io/#user-management-api)
+
+  //--------------------------------------------------------------------------------
+  //FUNCTION CLICK BUILD COLLAGE BUTTON
+  $('#collage-button').click(function() { 
+    var settings = $.param({
+      q: $('#search-query').val(),
+      lang: "en",
+      count: 100
+    })
+    result.get("https://api.twitter.com/1.1/search/tweets.json?"+settings).done(function(data){
+      keywordData = buildData(data);
+      buildQueryTags(keywordData);
+      queryFlickr();
+    });
+
+    // keywordData = buildData(sampleTwitterData);
+    // buildQueryTags(keywordData);
+    // queryFlickr();
   });
 
 }); //end document.ready function
